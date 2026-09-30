@@ -56,7 +56,7 @@
 
         <div class="input-row">
             <div class="input-label">
-                <span>Średnica frezu / Wysokość otworu</span>
+                <span>Średnica frezu / Szerokość slotu</span>
                 <span class="input-sublabel">Np. frez 8, 10, 12 mm</span>
             </div>
             <div class="stepper">
@@ -80,8 +80,8 @@
 
         <div class="input-row">
             <div class="input-label">
-                <span>Odstęp między otwory (mięso)</span>
-                <span class="input-sublabel">Odległość w mm</span>
+                <span>Odstęp między frezami (mięso)</span>
+                <span class="input-sublabel">Odległość pionowa w mm</span>
             </div>
             <div class="stepper">
                 <button class="stepper-btn" onclick="stepVentVal('inpGap', -1)">-</button>
@@ -92,13 +92,13 @@
 
         <div class="input-row">
             <div class="input-label">
-                <span>Odległość dolnej krawędzi frezu od dołu</span>
-                <span class="input-sublabel">Margines dolny w mm</span>
+                <span>Odległość pierwszego frezu od góry</span>
+                <span class="input-sublabel">Margines górny w mm</span>
             </div>
             <div class="stepper">
-                <button class="stepper-btn" onclick="stepVentVal('inpBottomMargin', -5)">-</button>
-                <input type="number" id="inpBottomMargin" class="stepper-input" value="80" onfocus="this.select()" onclick="this.select()" oninput="calculateVentilation()">
-                <button class="stepper-btn" onclick="stepVentVal('inpBottomMargin', 5)">+</button>
+                <button class="stepper-btn" onclick="stepVentVal('inpTopMargin', -5)">-</button>
+                <input type="number" id="inpTopMargin" class="stepper-input" value="80" onfocus="this.select()" onclick="this.select()" oninput="calculateVentilation()">
+                <button class="stepper-btn" onclick="stepVentVal('inpTopMargin', 5)">+</button>
             </div>
         </div>
     </div>
@@ -124,8 +124,8 @@
             <span class="shelf-dim" id="resVentTotalH">0 mm</span>
         </div>
         <div class="table-row">
-            <span class="shelf-num">Środek kratek od osi bocznej:</span>
-            <span class="shelf-dim" id="resVentCenterX">0 mm</span>
+            <span class="shelf-num">Pozostały margines dolny:</span>
+            <span class="shelf-dim" id="resVentBottomMargin">0 mm</span>
         </div>
         <div class="table-row">
             <span class="shelf-num">Powierzchnia przepływu powietrza:</span>
@@ -134,7 +134,7 @@
     </div>
 </div>
 
-<!-- KARTA SCHEMATU Z PRZYCISKIEM EXPORTU PDF -->
+<!-- KARTA SCHEMATU Z EXPORTEM PDF -->
 <div class="card" id="pdfPrintCard">
     <div class="card-header" style="justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -149,7 +149,7 @@
         </button>
     </div>
 
-    <div class="cad-wrapper" id="ventCadContainer" style="padding: 20px; background: var(--cad-bg);">
+    <div class="cad-wrapper" id="ventCadContainer" style="padding: 10px; background: var(--cad-bg); overflow-x: auto;">
         <!-- SVG CAD -->
     </div>
 </div>
