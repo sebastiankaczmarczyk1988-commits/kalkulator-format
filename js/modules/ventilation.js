@@ -18,7 +18,7 @@ function calculateVentilation() {
 
     if (frontW <= 0 || frontH <= 0 || count <= 0) return;
 
-    // Margines boczny (wyśrodkowanie)
+    // Margines boczny (wyśrodkowanie po szerokości)
     const sideMargin = (frontW - slotW) / 2;
     const totalVentH = (count * cutterD) + ((count - 1) * gap);
     const bottomMargin = frontH - topMargin - totalVentH;
@@ -46,7 +46,7 @@ function drawVentilationSVG(fW, fH, sW, cD, count, gap, tMargin, sMargin, totalV
     const maxBoxDim = 280;
     const scale = Math.min(maxBoxDim / fW, maxBoxDim / fH);
 
-    const startX = 65; // Odstęp od lewej na wymiar pionowy
+    const startX = 65; // Odstęp od lewej na pionowy wymiar
     const startY = 30; // Odstęp od góry
 
     const svgW = fW * scale + 110;
@@ -114,7 +114,7 @@ function drawVentilationSVG(fW, fH, sW, cD, count, gap, tMargin, sMargin, totalV
     cad.innerHTML = svg;
 }
 
-// Eksport do PDF
+// Bezpieczny eksport do PDF (wymusza wersję jasną jak na rysunku technicznym)
 function exportVentPDF() {
     const element = document.getElementById('pdfPrintCard');
     if (!element || typeof html2pdf === 'undefined') {
@@ -122,16 +122,48 @@ function exportVentPDF() {
         return;
     }
 
+    // Zapamiętujemy obecny motyw i przeliczamy w jasnych barwach
+    const wasDark = isDarkMode;
+    isDarkMode = false;
+    calculateVentilation();
+
+    // Tworzymy czysty klon elementu z białym tłem do druku
+    const clone = element.cloneNode(true);
+    clone.style.background = '#FFFFFF';
+    clone.style.color = '#000000';
+    clone.style.padding = '20px';
+    clone.style.borderRadius = '0px';
+
+    const pdfBtn = clone.querySelector('button');
+    if (pdfBtn) pdfBtn.style.display = 'none';
+
+    clone.querySelectorAll('*').forEach(el => {
+        el.style.color = '#000000';
+    });
+
+    const cadWrapper = clone.querySelector('.cad-wrapper');
+    if (cadWrapper) {
+        cadWrapper.style.background = '#FFFFFF';
+        cadWrapper.style.border = '1px solid #CCCCCC';
+    }
+
     const opt = {
-        margin:       10,
+        margin:       [10, 10, 10, 10],
         filename:     `FOR.MAT-frezowanie-kratek-${new Date().toISOString().slice(0,10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(clone).save().then(() => {
+        isDarkMode = wasDark;
+        calculateVentilation();
+    }).catch(err => {
+        console.error('Błąd PDF:', err);
+        isDarkMode = wasDark;
+        calculateVentilation();
+    });
 }
 
-// Inicjalizacja
+// Inicjalizacja wyliczeń przy starcie modułu
 calculateVentilation();
