@@ -27,10 +27,15 @@ function calculateVentilation() {
     const singleSlotArea = (slotW - cutterD) * cutterD + Math.PI * Math.pow(cutterD / 2, 2);
     const totalAreaCm2 = (singleSlotArea * count) / 100;
 
-    document.getElementById('resVentSideMargin').innerText = `${sideMargin.toFixed(1)} mm`;
-    document.getElementById('resVentTotalH').innerText = `${totalVentH.toFixed(1)} mm`;
-    document.getElementById('resVentBottomMargin').innerText = `${bottomMargin.toFixed(1)} mm`;
-    document.getElementById('resVentArea').innerText = `${totalAreaCm2.toFixed(1)} cm²`;
+    const resSide = document.getElementById('resVentSideMargin');
+    const resTotalH = document.getElementById('resVentTotalH');
+    const resBottom = document.getElementById('resVentBottomMargin');
+    const resArea = document.getElementById('resVentArea');
+
+    if (resSide) resSide.innerText = `${sideMargin.toFixed(1)} mm`;
+    if (resTotalH) resTotalH.innerText = `${totalVentH.toFixed(1)} mm`;
+    if (resBottom) resBottom.innerText = `${bottomMargin.toFixed(1)} mm`;
+    if (resArea) resArea.innerText = `${totalAreaCm2.toFixed(1)} cm²`;
 
     drawVentilationSVG(frontW, frontH, slotW, cutterD, count, gap, topMargin, sideMargin, totalVentH);
 }
@@ -84,7 +89,7 @@ function drawVentilationSVG(fW, fH, sW, cD, count, gap, tMargin, sMargin, totalV
     svg += `<line x1="${dimX1 - 4}" y1="${firstSlotY}" x2="${dimX1 + 4}" y2="${firstSlotY}" stroke="${accentColor}" stroke-width="1"/>`;
     svg += `<text x="${dimX1 - 6}" y="${topY + (firstSlotY - topY) / 2 + 3}" fill="${strokeColor}" font-size="10" font-weight="700" text-anchor="end">${tMargin.toFixed(0)} mm</text>`;
 
-    // 2. WYMIAR PIONOWY ODSTĘPU MIĘDZY FREZAMI (gap) - jeśli więcej niż 1 slot
+    // 2. WYMIAR PIONOWY ODSTĘPU MIĘDZY FREZAMI (gap)
     if (count > 1 && gap > 0) {
         const gapSlot1Bottom = startY + ((tMargin + cD) * scale);
         const gapSlot2Top = startY + ((tMargin + cD + gap) * scale);
@@ -114,56 +119,24 @@ function drawVentilationSVG(fW, fH, sW, cD, count, gap, tMargin, sMargin, totalV
     cad.innerHTML = svg;
 }
 
-// Bezpieczny eksport do PDF (wymusza wersję jasną jak na rysunku technicznym)
+// Niezawodne generowanie PDF / Drukowanie
 function exportVentPDF() {
-    const element = document.getElementById('pdfPrintCard');
-    if (!element || typeof html2pdf === 'undefined') {
-        alert('Generowanie PDF jest niedostępne. Upewnij się, że masz połączenie z internetem.');
-        return;
-    }
-
-    // Zapamiętujemy obecny motyw i przeliczamy w jasnych barwach
+    // 1. Zapisujemy stan motywu i wymuszamy wersję jasną (kontrastową)
     const wasDark = isDarkMode;
     isDarkMode = false;
     calculateVentilation();
 
-    // Tworzymy czysty klon elementu z białym tłem do druku
-    const clone = element.cloneNode(true);
-    clone.style.background = '#FFFFFF';
-    clone.style.color = '#000000';
-    clone.style.padding = '20px';
-    clone.style.borderRadius = '0px';
-
-    const pdfBtn = clone.querySelector('button');
-    if (pdfBtn) pdfBtn.style.display = 'none';
-
-    clone.querySelectorAll('*').forEach(el => {
-        el.style.color = '#000000';
-    });
-
-    const cadWrapper = clone.querySelector('.cad-wrapper');
-    if (cadWrapper) {
-        cadWrapper.style.background = '#FFFFFF';
-        cadWrapper.style.border = '1px solid #CCCCCC';
-    }
-
-    const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     `FOR.MAT-frezowanie-kratek-${new Date().toISOString().slice(0,10)}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opt).from(clone).save().then(() => {
-        isDarkMode = wasDark;
-        calculateVentilation();
-    }).catch(err => {
-        console.error('Błąd PDF:', err);
-        isDarkMode = wasDark;
-        calculateVentilation();
-    });
+    // 2. Wywołujemy natywne okno systemowe druku / zapisu jako PDF
+    setTimeout(() => {
+        window.print();
+        
+        // 3. Po zamknięciu okna druku przywracamy motyw aplikacji
+        setTimeout(() => {
+            isDarkMode = wasDark;
+            calculateVentilation();
+        }, 500);
+    }, 100);
 }
 
-// Inicjalizacja wyliczeń przy starcie modułu
+// Inicjalizacja przy wczytaniu modułu
 calculateVentilation();
