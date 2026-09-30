@@ -548,3 +548,33 @@ main {
 .calc-btn.btn-zero {
     grid-column: span 2;
 }
+
+/* STYLE DLA WYDRUKU / ZAPISU DO PDF */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding-bottom: 0 !important;
+    }
+    header, .bottom-nav, .btn-back, .theme-toggle, .card:not(#pdfPrintCard):not(:nth-child(2)), button {
+        display: none !important;
+    }
+    main {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    .card {
+        background: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #000000 !important;
+    }
+    .cad-wrapper {
+        background: #ffffff !important;
+        border: 1px solid #000000 !important;
+    }
+    .cad-wrapper svg {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
