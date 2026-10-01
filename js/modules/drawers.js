@@ -59,7 +59,12 @@ function calculateDrawers() {
 
     // Prezentacja wyników
     document.getElementById('resDrawerBottomDim').innerText = `${bottomW.toFixed(1)} mm x ${bottomL.toFixed(1)} mm`;
-    document.getElementById('resDrawerBackDim').innerText = `${backW.toFixed(1)} mm x ${backH.toFixed(1)} mm`;
+    
+    // Rozbicie wymiaru pleców dla osobnego nadkreślenia szerokości
+    const resBackW = document.getElementById('resDrawerBackW');
+    const resBackH = document.getElementById('resDrawerBackH');
+    if (resBackW) resBackW.innerText = `${backW.toFixed(1)} mm`;
+    if (resBackH) resBackH.innerText = `${backH.toFixed(1)} mm`;
 
     // Push To Open / Synchronizator
     const rowSynchro = document.getElementById('rowSynchronizer');
