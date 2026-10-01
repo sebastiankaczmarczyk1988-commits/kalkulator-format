@@ -102,18 +102,6 @@
                 <option value="199">199 mm</option>
             </select>
         </div>
-
-        <!-- Push To Open -->
-        <div class="input-row" style="margin-top: 4px;">
-            <div class="input-label">
-                <span>Push To Open</span>
-                <span class="input-sublabel">Synchronizator relingowy</span>
-            </div>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" id="chkPushToOpen" onchange="calculateDrawers()" style="width: 18px; height: 18px; accent-color: var(--cad-accent); cursor: pointer;">
-                <span style="font-size: 13px; font-weight: 600;">Tak</span>
-            </label>
-        </div>
     </div>
 </div>
 
@@ -151,10 +139,79 @@
             </div>
         </div>
 
-        <!-- Synchronizator (jeśli zaznaczono) -->
-        <div class="table-row" id="rowSynchronizer" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px; display: none;">
-            <span class="shelf-num">Długość relingu synchronizatora</span>
+        <!-- Panel frontowy (szuflada wpuszczana) -->
+        <div class="table-row" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
+            <span class="shelf-num">Panel frontowy (szuflada wpuszczana)</span>
+            <span class="shelf-dim" id="resDrawerFrontPanelW" style="font-size: 15px; color: var(--text-primary);">0 mm</span>
+        </div>
+
+        <!-- Reling frontowy (tylko wys. 167 i 199) -->
+        <div class="table-row" id="rowFrontRailing" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px; display: none;">
+            <span class="shelf-num">Szerokość relingu frontowego</span>
+            <span class="shelf-dim" id="resDrawerFrontRailingW" style="font-size: 15px; color: var(--text-primary);">0 mm</span>
+        </div>
+
+        <!-- Synchronizator Push To Open -->
+        <div class="table-row" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
+            <span class="shelf-num">Długość synchronizatora (Push To Open)</span>
             <span class="shelf-dim" id="resDrawerSynchroDim" style="font-size: 15px; color: var(--text-primary);">0 mm</span>
+        </div>
+    </div>
+</div>
+
+<!-- KARTA 4: MONTAŻ SZUFLAD W KORPUSIE -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-icon">
+            <svg viewBox="0 0 24 24">
+                <line x1="4" y1="6" x2="20" y2="6"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="4" y1="18" x2="20" y2="18"/>
+                <circle cx="8" cy="6" r="2"/>
+                <circle cx="16" cy="12" r="2"/>
+                <circle cx="10" cy="18" r="2"/>
+            </svg>
+        </div>
+        <span class="card-title">Montaż szuflad w korpusie</span>
+    </div>
+
+    <div class="input-list">
+        <!-- Liczba frontów -->
+        <div class="input-row">
+            <div class="input-label">
+                <span>Ilość frontów</span>
+                <span class="input-sublabel">Liczba szuflad w korpusie</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepDrawerVal('inpFrontsCount', -1, 1)">-</button>
+                <input type="number" id="inpFrontsCount" class="stepper-input" value="3" min="1" max="8" onfocus="this.select()" onclick="this.select()" oninput="renderFrontInputs(); calculateDrawers();">
+                <button class="stepper-btn" onclick="stepDrawerVal('inpFrontsCount', 1, 1)">+</button>
+            </div>
+        </div>
+
+        <!-- Szczelina między frontami -->
+        <div class="input-row">
+            <div class="input-label">
+                <span>Szczelina między frontami</span>
+                <span class="input-sublabel">Domyślnie mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepDrawerVal('inpGapBetween', -0.5)">-</button>
+                <input type="number" step="0.5" id="inpGapBetween" class="stepper-input" value="3" onfocus="this.select()" onclick="this.select()" oninput="calculateDrawers()">
+                <button class="stepper-btn" onclick="stepDrawerVal('inpGapBetween', 0.5)">+</button>
+            </div>
+        </div>
+
+        <!-- Dynamiczne pola dla wysokości frontów -->
+        <div id="frontsHeightInputsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+            <!-- Generowane dynamicznie przez JS -->
+        </div>
+    </div>
+
+    <div style="margin-top: 18px;">
+        <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Pozycja wkrętów prowadnic (od dołu wieńca):</span>
+        <div class="list-table" id="runnerPositionsContainer" style="margin-top: 8px;">
+            <!-- Wyniki pozycji prowadnic -->
         </div>
     </div>
 </div>
