@@ -18,8 +18,13 @@ function renderAssemblyFrontInputs() {
     const count = parseInt(document.getElementById('inpFrontsCount').value) || 1;
     let html = '';
 
+    // Pobieramy domyślne wartości w zależności od numeru frontu (od dołu!)
     for (let i = 1; i <= count; i++) {
-        const defaultH = i === 1 ? 140 : 284;
+        let defaultH = 284;
+        if (i === 1) defaultH = 300;
+        else if (i === 2) defaultH = 300;
+        else if (i === 3) defaultH = 159;
+
         html += `
             <div class="input-row">
                 <div class="input-label">
