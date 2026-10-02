@@ -25,24 +25,21 @@ function loadModule(moduleName) {
         homePage.style.display = 'block';
         currentModule = 'home';
         
-        // Zapisujemy stan w historii przeglądarki
         if (history.state?.module !== 'home') {
             history.pushState({ module: 'home' }, '', '#home');
         }
         return;
     }
 
-    // Ładowanie modułu
     homePage.style.display = 'none';
     appContent.style.display = 'block';
     currentModule = moduleName;
 
-    // Aktualizacja historii przeglądarki (History API)
     if (history.state?.module !== moduleName) {
         history.pushState({ module: moduleName }, '', `#${moduleName}`);
     }
 
-    // Pobieranie szablonu HTML modułu z pętlą unikania pamięci podręcznej (cache-busting)
+    // Pobieranie szablonu HTML modułu
     fetch(`modules/${moduleName}.html?v=${Date.now()}`)
         .then(response => {
             if (!response.ok) throw new Error('Błąd ładowania pliku modułu');
@@ -51,16 +48,25 @@ function loadModule(moduleName) {
         .then(html => {
             appContent.innerHTML = html;
 
-            // Dynamiczne podpinanie dedykowanego pliku JS dla modułu
+            // Czyszczenie starego skryptu modułu
             const oldScript = document.getElementById('module-script');
             if (oldScript) oldScript.remove();
 
+            // Tworzenie nowego skryptu
             const script = document.createElement('script');
             script.id = 'module-script';
             script.src = `js/modules/${moduleName}.js?v=${Date.now()}`;
+            
+            // Po załadowaniu skryptu upewniamy się, że wywołana zostanie funkcja wyliczająca / rysująca
+            script.onload = () => {
+                if (moduleName === 'shelves' && typeof calculateShelves === 'function') {
+                    calculateShelves();
+                }
+            };
+
             document.body.appendChild(script);
 
-            // Przewijanie na górę ekranu
+            // Przewijanie na górę
             window.scrollTo(0, 0);
         })
         .catch(err => {
@@ -72,16 +78,12 @@ function loadModule(moduleName) {
 // OBSŁUGA PRZYCISKU WSTECZ (Gesty mobilne / Android / iOS)
 window.addEventListener('popstate', function (event) {
     if (currentModule !== 'home') {
-        // Jeśli jesteśmy w module -> wracamy do menu głównego
         loadModule('home');
     } else {
-        // Jeśli jesteśmy w menu głównym -> logika "Dwuklik wstecz aby wyjść"
         const now = Date.now();
         if (now - lastBackPressTime < 2000) {
-            // Drugie kliknięcie w ciągu 2 sekund -> pozwól na wyjście / zamknięcie
             return;
         } else {
-            // Pierwsze kliknięcie w menu -> zablokuj wyjście i pokaż podpowiedź
             lastBackPressTime = now;
             history.pushState({ module: 'home' }, '', '#home');
             showToast('Naciśnij ponownie Wstecz, aby wyjść');
@@ -89,7 +91,7 @@ window.addEventListener('popstate', function (event) {
     }
 });
 
-// Szybkie powiadomienie Toast na dole ekranu
+// Szybkie powiadomienie Toast
 function showToast(message) {
     let toast = document.getElementById('app-toast');
     if (!toast) {
@@ -123,7 +125,6 @@ function showToast(message) {
 
 // Inicjalizacja przy pierwszym otwarciu strony
 document.addEventListener('DOMContentLoaded', () => {
-    // Ustawienie punktu początkowego w historii
     history.replaceState({ module: 'home' }, '', '#home');
     loadModule('home');
 });
