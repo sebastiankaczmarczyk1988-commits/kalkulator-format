@@ -52,12 +52,16 @@ function calculateAssembly() {
 
     let html = '';
 
-    // Baza trasowania dolnej prowadnicy w zależności od systemu (od dolnej krawędzi frontu/wieńca)
-    let baseOffset = 33; // Domyślna wartość dla systemów standardowych
+    // Domyślna baza trasowania pierwszej (dolnej) prowadnicy dla poszczególnych systemów
+    let baseOffset = 33; 
     if (system === 'rejs_ultrabox') baseOffset = 49;
     else if (system === 'blum_antaro') baseOffset = 33;
     else if (system === 'blum_merivobox') baseOffset = 33;
+    else if (system === 'blum_legrabox') baseOffset = 33;
     else if (system === 'gtv_axispro') baseOffset = 33;
+    else if (system === 'gtv_modernbox') baseOffset = 33;
+    else if (system === 'hettich_atira') baseOffset = 33;
+    else if (system === 'hettich_antech') baseOffset = 33;
 
     for (let i = 1; i <= count; i++) {
         let pos = 0;
@@ -88,6 +92,5 @@ function calculateAssembly() {
     container.innerHTML = html;
 }
 
-// Inicjalizacja przy ładowaniu
 renderAssemblyFrontInputs();
 calculateAssembly();

@@ -1,6 +1,5 @@
 let drawerWidthType = 'external';
 
-// Baza wysokości szuflad dla poszczególnych systemów
 const systemHeights = {
     rejs_ultrabox: [
         { label: '86 mm', value: 86 },
@@ -21,11 +20,34 @@ const systemHeights = {
         { label: 'K (123 mm)', value: 123 },
         { label: 'E (192 mm)', value: 192 }
     ],
+    blum_legrabox: [
+        { label: 'N (63 mm)', value: 63 },
+        { label: 'M (91 mm)', value: 91 },
+        { label: 'K (123 mm)', value: 123 },
+        { label: 'C (177 mm)', value: 177 },
+        { label: 'F (241 mm)', value: 241 }
+    ],
     gtv_axispro: [
         { label: 'Niska (84 mm)', value: 84 },
         { label: 'Średnia (116 mm)', value: 116 },
         { label: 'Wysoka (168 mm)', value: 168 },
         { label: 'Bardzo wysoka (199 mm)', value: 199 }
+    ],
+    gtv_modernbox: [
+        { label: 'Niska (84 mm)', value: 84 },
+        { label: 'Średnia (135 mm)', value: 135 },
+        { label: 'Wysoka (199 mm)', value: 199 }
+    ],
+    hettich_atira: [
+        { label: 'Niska (70 mm)', value: 70 },
+        { label: 'Średnia (144 mm)', value: 144 },
+        { label: 'Wysoka (176 mm)', value: 176 }
+    ],
+    hettich_antech: [
+        { label: 'Wysokość 101 mm', value: 101 },
+        { label: 'Wysokość 139 mm', value: 139 },
+        { label: 'Wysokość 187 mm', value: 187 },
+        { label: 'Wysokość 251 mm', value: 251 }
     ]
 };
 
@@ -96,47 +118,88 @@ function calculateDrawers() {
     const rowFrontPanel = document.getElementById('rowFrontPanel');
     const rowSynchro = document.getElementById('rowSynchro');
 
-    if (system === 'rejs_ultrabox') {
-        bottomW = intWidth - 75;
-        bottomL = runnerLength - 24;
-        backW = intWidth - 87;
-        frontPanelW = intWidth - 98;
-        frontRailingW = intWidth - 85;
-        synchroL = intWidth - 128;
+    switch (system) {
+        case 'rejs_ultrabox':
+            bottomW = intWidth - 75;
+            bottomL = runnerLength - 24;
+            backW = intWidth - 87;
+            frontPanelW = intWidth - 98;
+            frontRailingW = intWidth - 85;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = (drawerHeight === 167 || drawerHeight === 199) ? 'flex' : 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'flex';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-        if (rowFrontRailing) rowFrontRailing.style.display = (drawerHeight === 167 || drawerHeight === 199) ? 'flex' : 'none';
-        if (rowFrontPanel) rowFrontPanel.style.display = 'flex';
-        if (rowSynchro) rowSynchro.style.display = 'flex';
+        case 'blum_antaro':
+            bottomW = intWidth - 75;
+            bottomL = runnerLength - 24;
+            backW = intWidth - 87;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-    } else if (system === 'blum_antaro') {
-        bottomW = intWidth - 75;
-        bottomL = runnerLength - 24;
-        backW = intWidth - 87;
-        synchroL = intWidth - 128;
+        case 'blum_merivobox':
+            bottomW = intWidth - 42;
+            bottomL = runnerLength - 14;
+            backW = intWidth - 42;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-        if (rowFrontRailing) rowFrontRailing.style.display = 'none';
-        if (rowFrontPanel) rowFrontPanel.style.display = 'none';
-        if (rowSynchro) rowSynchro.style.display = 'flex';
+        case 'blum_legrabox':
+            bottomW = intWidth - 35;
+            bottomL = runnerLength - 10;
+            backW = intWidth - 38;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-    } else if (system === 'blum_merivobox') {
-        bottomW = intWidth - 42;
-        bottomL = runnerLength - 14;
-        backW = intWidth - 42;
-        synchroL = intWidth - 128;
+        case 'gtv_axispro':
+            bottomW = intWidth - 75;
+            bottomL = runnerLength - 24;
+            backW = intWidth - 87;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-        if (rowFrontRailing) rowFrontRailing.style.display = 'none';
-        if (rowFrontPanel) rowFrontPanel.style.display = 'none';
-        if (rowSynchro) rowSynchro.style.display = 'flex';
+        case 'gtv_modernbox':
+            bottomW = intWidth - 75;
+            bottomL = runnerLength - 24;
+            backW = intWidth - 87;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-    } else if (system === 'gtv_axispro') {
-        bottomW = intWidth - 75;
-        bottomL = runnerLength - 24;
-        backW = intWidth - 87;
-        synchroL = intWidth - 128;
+        case 'hettich_atira':
+            bottomW = intWidth - 75;
+            bottomL = runnerLength - 20;
+            backW = intWidth - 87;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
 
-        if (rowFrontRailing) rowFrontRailing.style.display = 'none';
-        if (rowFrontPanel) rowFrontPanel.style.display = 'none';
-        if (rowSynchro) rowSynchro.style.display = 'flex';
+        case 'hettich_antech':
+            bottomW = intWidth - 35;
+            bottomL = runnerLength - 12;
+            backW = intWidth - 38;
+            synchroL = intWidth - 128;
+            if (rowFrontRailing) rowFrontRailing.style.display = 'none';
+            if (rowFrontPanel) rowFrontPanel.style.display = 'none';
+            if (rowSynchro) rowSynchro.style.display = 'flex';
+            break;
     }
 
     document.getElementById('resDrawerBottomDim').innerText = `${bottomW.toFixed(1)} mm x ${bottomL.toFixed(1)} mm`;
@@ -151,6 +214,5 @@ function calculateDrawers() {
     if (document.getElementById('resDrawerSynchroDim')) document.getElementById('resDrawerSynchroDim').innerText = `${synchroL.toFixed(1)} mm`;
 }
 
-// Inicjalizacja przy ładowaniu
 updateHeightSelectOptions();
 calculateDrawers();
