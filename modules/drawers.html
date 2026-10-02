@@ -61,11 +61,11 @@
             <div class="input-label">
                 <span>System / Producent</span>
             </div>
-            <select id="selDrawerSystem" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; outline: none; width: 55%;">
+            <select id="selDrawerSystem" onchange="onDrawerSystemChange()" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; outline: none; width: 55%;">
                 <option value="rejs_ultrabox" selected>REJS - UltraBox</option>
-                <option value="blum_antaro" disabled>BLUM - Antaro (wkrótce)</option>
-                <option value="blum_merivobox" disabled>BLUM - Merivobox (wkrótce)</option>
-                <option value="gtv_axispro" disabled>GTV - Axis Pro (wkrótce)</option>
+                <option value="blum_antaro">BLUM - Antaro</option>
+                <option value="blum_merivobox">BLUM - Merivobox</option>
+                <option value="gtv_axispro">GTV - Axis Pro</option>
             </select>
         </div>
 
@@ -75,6 +75,7 @@
                 <span class="input-sublabel">Głębokość mm</span>
             </div>
             <select id="selDrawerLength" onchange="calculateDrawers()" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; outline: none; width: 55%;">
+                <option value="270">270 mm</option>
                 <option value="300">300 mm</option>
                 <option value="350">350 mm</option>
                 <option value="400">400 mm</option>
@@ -87,13 +88,10 @@
         <div class="input-row">
             <div class="input-label">
                 <span>Wysokość szuflady</span>
-                <span class="input-sublabel">Wymiar mm</span>
+                <span class="input-sublabel">Typ / Wymiar mm</span>
             </div>
             <select id="selDrawerHeight" onchange="calculateDrawers()" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; outline: none; width: 55%;">
-                <option value="86">86 mm</option>
-                <option value="118">118 mm</option>
-                <option value="167">167 mm</option>
-                <option value="199">199 mm</option>
+                <!-- Dynamicznie aktualizowane przez JS w zależności od wybranego systemu -->
             </select>
         </div>
     </div>
@@ -131,7 +129,7 @@
             </div>
         </div>
 
-        <div class="table-row" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
+        <div class="table-row" id="rowFrontPanel" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
             <span class="shelf-num">Panel frontowy (szuflada wpuszczana)</span>
             <span class="shelf-dim" id="resDrawerFrontPanelW" style="font-size: 15px; color: var(--text-primary);">0 mm</span>
         </div>
@@ -141,7 +139,7 @@
             <span class="shelf-dim" id="resDrawerFrontRailingW" style="font-size: 15px; color: var(--text-primary);">0 mm</span>
         </div>
 
-        <div class="table-row" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
+        <div class="table-row" id="rowSynchro" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
             <span class="shelf-num">Długość synchronizatora (Push To Open)</span>
             <span class="shelf-dim" id="resDrawerSynchroDim" style="font-size: 15px; color: var(--text-primary);">0 mm</span>
         </div>

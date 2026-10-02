@@ -24,8 +24,11 @@
             <div class="input-label">
                 <span>System / Producent</span>
             </div>
-            <select id="selAssemblySystem" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; outline: none; width: 55%;">
+            <select id="selAssemblySystem" onchange="calculateAssembly()" style="background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; outline: none; width: 55%;">
                 <option value="rejs_ultrabox" selected>REJS - UltraBox</option>
+                <option value="blum_antaro">BLUM - Antaro</option>
+                <option value="blum_merivobox">BLUM - Merivobox</option>
+                <option value="gtv_axispro">GTV - Axis Pro</option>
             </select>
         </div>
 
