@@ -1,112 +1,123 @@
-let heightType = 'external';
+let shelfWidthType = 'external';
 
-function stepVal(id, step, min = 0) {
+function stepShelfVal(id, step, min = 0) {
     const input = document.getElementById(id);
+    if (!input) return;
     let val = (parseFloat(input.value) || 0) + step;
     if (val < min) val = min;
     input.value = val;
     calculateShelves();
 }
 
-function setType(type) {
-    heightType = type;
-    const btnExt = document.getElementById('btnTypeExt');
-    const btnInt = document.getElementById('btnTypeInt');
-    const lbl = document.getElementById('lblHeight');
+function setShelfWidthType(type) {
+    shelfWidthType = type;
+    const btnExt = document.getElementById('btnShelfTypeExt');
+    const btnInt = document.getElementById('btnShelfTypeInt');
+    const lbl = document.getElementById('lblShelfHeight');
+    const rowBodyThick = document.getElementById('rowShelfBodyThick');
 
-    if(type === 'external') {
+    if (type === 'external') {
         btnExt.classList.add('active');
         btnInt.classList.remove('active');
         lbl.innerText = 'Wysokość zewnętrzna';
+        if (rowBodyThick) rowBodyThick.style.display = 'flex';
     } else {
         btnInt.classList.add('active');
         btnExt.classList.remove('active');
-        lbl.innerText = 'Wysokość wewnątrz';
+        lbl.innerText = 'Światło (wysokość wewnątrz)';
+        if (rowBodyThick) rowBodyThick.style.display = 'none';
     }
     calculateShelves();
 }
 
 function calculateShelves() {
-    const height = parseFloat(document.getElementById('inpHeight').value) || 0;
-    const bodyThick = parseFloat(document.getElementById('inpBodyThick').value) || 0;
+    const rawHeight = parseFloat(document.getElementById('inpShelfHeight').value) || 0;
+    const bodyThick = parseFloat(document.getElementById('inpShelfBodyThick').value) || 0;
     const shelfThick = parseFloat(document.getElementById('inpShelfThick').value) || 0;
-    const shelfCount = parseInt(document.getElementById('inpShelfCount').value) || 0;
+    const count = parseInt(document.getElementById('inpShelfCount').value) || 1;
 
-    if(height <= 0 || shelfCount <= 0) return;
+    const resGap = document.getElementById('resShelfGap');
+    const container = document.getElementById('shelfPositionsContainer');
 
-    const internalHeight = heightType === 'external' ? (height - 2 * bodyThick) : height;
-    const totalShelfThickness = shelfCount * shelfThick;
-    const clearSpace = (internalHeight - totalShelfThickness) / (shelfCount + 1);
+    if (rawHeight <= 0 || count <= 0) return;
 
-    document.getElementById('resClearSpace').innerText = `${clearSpace.toFixed(1)} mm`;
+    // Wysokość wewnętrzna (światło korpusu)
+    const intHeight = shelfWidthType === 'external' ? (rawHeight - (2 * bodyThick)) : rawHeight;
 
-    const listEl = document.getElementById('measuresList');
-    listEl.innerHTML = '';
+    // Przestrzeń użytkowa między półkami
+    const availableSpace = intHeight - (count * shelfThick);
+    const gap = availableSpace / (count + 1);
 
-    const shelvesData = [];
+    if (resGap) resGap.innerText = `${gap.toFixed(1)} mm`;
 
-    for(let i = 1; i <= shelfCount; i++) {
-        const bottomEdge = (i * clearSpace) + ((i - 1) * shelfThick);
-        const centerEdge = bottomEdge + (shelfThick / 2);
-        const topEdge = bottomEdge + shelfThick;
+    // Generowanie tabeli wyników trasowania (wyłącznie wewnątrz od górnej krawędzi wieńca)
+    let html = '';
+    let shelfPositions = []; // Przetrzymuje pozycję dolnej krawędzi każdej półki mierzoną od dna wnętrza
 
-        shelvesData.push({ i, bottomEdge, centerEdge, topEdge });
+    for (let i = 1; i <= count; i++) {
+        // Pozycja dolnej płaszczyzny i-tej półki liczona od górnej płaszczyzny wieńca dolnego
+        const posFromBottomInside = (i * gap) + ((i - 1) * shelfThick);
+        shelfPositions.push(posFromBottomInside);
 
-        const row = document.createElement('div');
-        row.className = 'table-row';
-        row.innerHTML = `
-            <span class="shelf-num">Półka #${i} (od dołu)</span>
-            <span class="shelf-dim">Dół: ${bottomEdge.toFixed(1)} mm | Oś: ${centerEdge.toFixed(1)} mm</span>
+        html += `
+            <div class="table-row">
+                <span class="shelf-num">Półka ${i} (od wieńca dolnego)</span>
+                <span class="shelf-dim">${posFromBottomInside.toFixed(1)} mm</span>
+            </div>
         `;
-        listEl.appendChild(row);
     }
 
-    drawShelvesSVG(internalHeight, bodyThick, shelfThick, shelfCount, clearSpace, shelvesData);
+    if (container) container.innerHTML = html;
+
+    // Rysowanie na płótnie Canvas
+    drawShelvesCanvas(intHeight, shelfThick, count, gap, shelfPositions);
 }
 
-function drawShelvesSVG(intH, bodyT, shelfT, count, clearS, shelves) {
-    const cad = document.getElementById('cadContainer');
-    
-    const strokeColor = isDarkMode ? '#F2F2F7' : '#1C1C1E';
-    const accentColor = isDarkMode ? '#0A84FF' : '#007AFF';
-    const fillColor = isDarkMode ? '#2C2C2E' : '#E5E5EA';
+function drawShelvesCanvas(intHeight, shelfThick, count, gap, shelfPositions) {
+    const canvas = document.getElementById('shelfCanvas');
+    if (!canvas) return;
 
-    const totalH = intH + 2 * bodyT;
-    const svgH = 320;
-    const svgW = 220;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
 
-    const scale = (svgH - 40) / totalH;
-    const scaledBodyT = Math.max(bodyT * scale, 5);
+    ctx.clearRect(0, 0, w, h);
 
-    let svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">`;
+    // Marginesy rysunku
+    const padX = 35;
+    const padY = 25;
+    const boxW = w - (2 * padX);
+    const boxH = h - (2 * padY);
 
-    const startY = 20;
-    const startX = 30;
-    const boxW = 100;
-    const scaledTotalH = totalH * scale;
+    // Tło korpusu
+    ctx.strokeStyle = '#4a5568';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(padX, padY, boxW, boxH);
 
-    // Wieniec górny i dolny
-    svg += `<rect x="${startX}" y="${startY}" width="${boxW}" height="${scaledBodyT}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.5" rx="1"/>`;
-    svg += `<rect x="${startX}" y="${startY + scaledTotalH - scaledBodyT}" width="${boxW}" height="${scaledBodyT}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.5" rx="1"/>`;
+    // Rysowanie wieńca dolnego i górnego
+    ctx.fillStyle = '#2d3748';
+    ctx.fillRect(padX, padY - 6, boxW, 6);
+    ctx.fillRect(padX, padY + boxH, boxW, 6);
 
-    // Bok tylny
-    svg += `<rect x="${startX}" y="${startY}" width="${scaledBodyT}" height="${scaledTotalH}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.5" rx="1"/>`;
+    // Rysowanie półek w środku
+    ctx.fillStyle = '#f59e0b'; // Kolor akcentowy półki
 
-    // Półki
-    shelves.forEach(s => {
-        const shelfY = startY + scaledTotalH - scaledBodyT - (s.topEdge * scale);
-        const scaledShelfT = Math.max(shelfT * scale, 3);
-        svg += `<rect x="${startX + scaledBodyT}" y="${shelfY}" width="${boxW - scaledBodyT}" height="${scaledShelfT}" fill="${accentColor}" rx="1"/>`;
-        
-        // Linia wymiarowa dolnej krawędzi
-        const bottomEdgeY = shelfY + scaledShelfT;
-        svg += `<line x1="${startX + boxW + 5}" y1="${bottomEdgeY}" x2="${startX + boxW + 40}" y2="${bottomEdgeY}" stroke="${accentColor}" stroke-width="1" stroke-dasharray="3,3"/>`;
-        svg += `<text x="${startX + boxW + 45}" y="${bottomEdgeY + 3}" fill="${strokeColor}" font-size="10" font-weight="600">${s.bottomEdge.toFixed(0)}</text>`;
+    const scale = boxH / intHeight;
+
+    shelfPositions.forEach((pos) => {
+        // Zamiana współrzędnych (Canvas rysuje od góry)
+        const shelfYOnCanvas = padY + boxH - (pos * scale) - (shelfThick * scale);
+        const shelfHOnCanvas = Math.max(3, shelfThick * scale);
+
+        ctx.fillRect(padX + 2, shelfYOnCanvas, boxW - 4, shelfHOnCanvas);
     });
 
-    svg += `</svg>`;
-    cad.innerHTML = svg;
+    // Opis skrajnych wymiarów na Canvasie
+    ctx.fillStyle = '#a0aec0';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Światło: ${intHeight.toFixed(0)} mm`, w / 2, 14);
 }
 
-// Inicjalizacja obliczeń dla półek
+// Inicjalizacja przy wczytaniu
 calculateShelves();
