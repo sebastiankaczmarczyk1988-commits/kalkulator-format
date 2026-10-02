@@ -54,16 +54,8 @@ function calculateAssembly() {
     let runnerHtml = '';
     let frontHtml = '';
 
-    // Domyślna baza trasowania pierwszej (dolnej) prowadnicy od wieńca
-    let baseOffset = 33; 
-    if (system === 'rejs_ultrabox') baseOffset = 49;
-    else if (system === 'blum_antaro') baseOffset = 33;
-    else if (system === 'blum_merivobox') baseOffset = 33;
-    else if (system === 'blum_legrabox') baseOffset = 33;
-    else if (system === 'gtv_axispro') baseOffset = 33;
-    else if (system === 'gtv_modernbox') baseOffset = 33;
-    else if (system === 'hettich_atira') baseOffset = 33;
-    else if (system === 'hettich_antech') baseOffset = 33;
+    // Stałe odsunięcie bocznej linii trasowania dla frontu nakładanego
+    const sideOffset = 32.0;
 
     // Pobranie wysokości frontów
     let frontHeights = [];
@@ -72,27 +64,21 @@ function calculateAssembly() {
         frontHeights.push(inputH ? (parseFloat(inputH.value) || 0) : 0);
     }
 
-    let runnerPositions = [];
-
-    // 1. OBLICZANIE POZYCJI PROWADNIC W KORPUSIE
+    // 1. OBLICZANIE POZYCJI PROWADNIC W KORPUSIE (OD DOŁU BOKU)
     for (let i = 1; i <= count; i++) {
         let pos = 0;
 
         if (i === 1) {
-            pos = baseOffset;
-        } else if (i === 2) {
-            const front1H = frontHeights[0];
-            pos = (front1H - 18) + 10 + gap + baseOffset;
+            // Prowadnica 1: 49 mm + 18 mm = 67 mm
+            pos = 49 + 18;
         } else {
-            const front1H = frontHeights[0];
-            let middleSum = 0;
-            for (let j = 1; j < i - 1; j++) {
-                middleSum += frontHeights[j] + gap;
+            // Prowadnice kolejne: Suma poprzednich frontów + szczeliny + 10 mm + 49 mm
+            let prevFrontsSum = 0;
+            for (let j = 0; j < i - 1; j++) {
+                prevFrontsSum += frontHeights[j] + gap;
             }
-            pos = (front1H - 18) + gap + middleSum + (4 + gap) + 10 + baseOffset;
+            pos = prevFrontsSum + 10 + 49;
         }
-
-        runnerPositions.push(pos);
 
         runnerHtml += `
             <div class="table-row">
@@ -102,32 +88,25 @@ function calculateAssembly() {
         `;
     }
 
-    // 2. OBLICZANIE TRASOWANIA OTWORÓW NA FRONTACH (OD DOŁU KAŻDEGO FRONTU)
-    let accumulatedFrontY = 0; // Dolna krawędź obecnego frontu mierzona od wieńca dolnego
-
+    // 2. OBLICZANIE TRASOWANIA OTWORÓW NA FRONTACH (OD DOŁU DANEGO FRONTU)
     for (let i = 1; i <= count; i++) {
-        const currentFrontH = frontHeights[i - 1];
-        const runnerY = runnerPositions[i - 1];
-
         let bottomHole = 0;
-        let topHole = 0;
 
-        if (system === 'rejs_ultrabox') {
-            // Weryfikacja praktyczna: dolna krawędź prowadnicy + 17mm = dolny otwór mocowania
-            // Dla dolnej prowadnicy (49mm): 49mm + 17mm = 66mm od dołu frontu #1
-            bottomHole = (runnerY - accumulatedFrontY) + 17;
-            topHole = bottomHole + 32;
+        if (i === 1) {
+            // Front #1 (dolny): 48 mm + 18 mm = 66 mm
+            bottomHole = 48 + 18;
         } else {
-            // Standardowe systemy (np. Blum/GTV): dolna krawędź prowadnicy + 14mm = dolny otwór
-            bottomHole = (runnerY - accumulatedFrontY) + 14;
-            topHole = bottomHole + 32;
+            // Front #2, #3... (kolejne): 48 mm + 10 mm = 58 mm
+            bottomHole = 48 + 10;
         }
+
+        const topHole = bottomHole + 32;
 
         frontHtml += `
             <div class="table-row" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px;">
                 <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                     <span class="shelf-num">Front #${i} ${i === 1 ? '(dolny)' : ''}</span>
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--card-bg); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--card-border);">Odsunięcie bocznie: 12.5 mm</span>
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--card-bg); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--card-border);">Bok: ${sideOffset.toFixed(1)} mm</span>
                 </div>
                 <div style="font-size: 14px; font-weight: 700; color: var(--cad-accent); margin-top: 2px;">
                     Dolny wkręt: <span style="color: var(--text-primary);">${bottomHole.toFixed(1)} mm</span> &nbsp;|&nbsp; 
@@ -135,9 +114,6 @@ function calculateAssembly() {
                 </div>
             </div>
         `;
-
-        // Przesuwamy punkt odniesienia dla kolejnego frontu (wysokość frontu + szczelina)
-        accumulatedFrontY += currentFrontH + gap;
     }
 
     runnerContainer.innerHTML = runnerHtml;
