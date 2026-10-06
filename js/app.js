@@ -1,130 +1,75 @@
-// Główny skrypt aplikacji FOR.MAT
-
+let isDarkMode = true;
 let currentModule = 'home';
-let lastBackPressTime = 0;
 
-// Dynamiczne ładowanie modułów
-function loadModule(moduleName) {
-    const appContent = document.getElementById('app-content');
-    const homePage = document.getElementById('homePage');
-    const navItems = document.querySelectorAll('.nav-item');
-
-    if (!appContent || !homePage) return;
-
-    // Aktualizacja stanu nawigacji
-    navItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(`'${moduleName}'`)) {
-            item.classList.add('active');
-        }
-    });
-
+// Dynamiczne wczytywanie modułów HTML i JS
+async function loadModule(moduleName) {
+    const contentContainer = document.getElementById('app-content');
+    
     if (moduleName === 'home') {
-        appContent.innerHTML = '';
-        appContent.style.display = 'none';
-        homePage.style.display = 'block';
+        document.getElementById('homePage').style.display = 'block';
+        contentContainer.innerHTML = '';
         currentModule = 'home';
-        
-        if (history.state?.module !== 'home') {
-            history.pushState({ module: 'home' }, '', '#home');
-        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
     }
 
-    homePage.style.display = 'none';
-    appContent.style.display = 'block';
-    currentModule = moduleName;
+    document.getElementById('homePage').style.display = 'none';
 
-    if (history.state?.module !== moduleName) {
-        history.pushState({ module: moduleName }, '', `#${moduleName}`);
-    }
+    try {
+        // Pobieranie pliku HTML modułu
+        const response = await fetch(`modules/${moduleName}.html`);
+        if (!response.ok) throw new Error('Nie znaleziono pliku modułu');
+        const html = await response.text();
+        contentContainer.innerHTML = html;
 
-    // Pobieranie szablonu HTML modułu
-    fetch(`modules/${moduleName}.html?v=${Date.now()}`)
-        .then(response => {
-            if (!response.ok) throw new Error('Błąd ładowania pliku modułu');
-            return response.text();
-        })
-        .then(html => {
-            appContent.innerHTML = html;
-
-            // Czyszczenie starego skryptu modułu
-            const oldScript = document.getElementById('module-script');
-            if (oldScript) oldScript.remove();
-
-            // Tworzenie nowego skryptu
+        // Ładowanie skryptu JS modułu jeśli jeszcze nie istnieje
+        if (!document.getElementById(`script-${moduleName}`)) {
             const script = document.createElement('script');
-            script.id = 'module-script';
-            script.src = `js/modules/${moduleName}.js?v=${Date.now()}`;
-            
-            // Po załadowaniu skryptu upewniamy się, że wywołana zostanie funkcja wyliczająca / rysująca
-            script.onload = () => {
-                if (moduleName === 'shelves' && typeof calculateShelves === 'function') {
-                    calculateShelves();
-                }
-            };
-
+            script.id = `script-${moduleName}`;
+            script.src = `js/modules/${moduleName}.js`;
             document.body.appendChild(script);
-
-            // Przewijanie na górę
-            window.scrollTo(0, 0);
-        })
-        .catch(err => {
-            console.error(err);
-            appContent.innerHTML = `<div class="card"><p style="color:red;">Błąd ładowania modułu ${moduleName}. Sprawdź połączenie.</p></div>`;
-        });
-}
-
-// OBSŁUGA PRZYCISKU WSTECZ (Gesty mobilne / Android / iOS)
-window.addEventListener('popstate', function (event) {
-    if (currentModule !== 'home') {
-        loadModule('home');
-    } else {
-        const now = Date.now();
-        if (now - lastBackPressTime < 2000) {
-            return;
         } else {
-            lastBackPressTime = now;
-            history.pushState({ module: 'home' }, '', '#home');
-            showToast('Naciśnij ponownie Wstecz, aby wyjść');
+            // Jeśli skrypt już był wczytany, uruchamiamy przeliczenie
+            if (moduleName === 'shelves' && typeof calculateShelves === 'function') {
+                calculateShelves();
+            }
         }
+        
+        currentModule = moduleName;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        console.error('Błąd ładowania modułu:', error);
+        contentContainer.innerHTML = `<div class="card"><p style="text-align:center; color:var(--text-secondary);">Moduł w przygotowaniu...</p></div>`;
     }
-});
-
-// Szybkie powiadomienie Toast
-function showToast(message) {
-    let toast = document.getElementById('app-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'app-toast';
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 75px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        `;
-        document.body.appendChild(toast);
-    }
-    toast.innerText = message;
-    toast.style.opacity = '1';
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-    }, 2000);
 }
 
-// Inicjalizacja przy pierwszym otwarciu strony
-document.addEventListener('DOMContentLoaded', () => {
-    history.replaceState({ module: 'home' }, '', '#home');
-    loadModule('home');
+// Obsługa Motywu Dzień / Noc
+const themeBtn = document.getElementById('themeBtn');
+const themeIcon = document.getElementById('themeIcon');
+const mainLogo = document.getElementById('mainLogo');
+
+function updateThemeIcon() {
+    if(isDarkMode) {
+        themeIcon.innerHTML = `<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>`;
+        if(mainLogo) mainLogo.src = 'logo-white.png';
+    } else {
+        themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>`;
+        if(mainLogo) mainLogo.src = 'logo-black.png';
+    }
+}
+
+themeBtn.addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    if(isDarkMode) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-color-meta').setAttribute('content', '#121214');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.getElementById('theme-color-meta').setAttribute('content', '#F4F4F6');
+    }
+    updateThemeIcon();
+    if(currentModule === 'shelves' && typeof calculateShelves === 'function') calculateShelves();
 });
+
+// Inicjalizacja
+updateThemeIcon();

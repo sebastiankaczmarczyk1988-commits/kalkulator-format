@@ -1,0 +1,101 @@
+<button class="btn-back" onclick="loadModule('home')">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <span>Powrót do menu</span>
+</button>
+
+<!-- KARTA DANYCH -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </div>
+        <span class="card-title">Rozstaw półek</span>
+    </div>
+
+    <div class="segmented-control">
+        <button type="button" class="active" id="btnTypeExt" onclick="setType('external')">Wymiar zewn.</button>
+        <button type="button" id="btnTypeInt" onclick="setType('internal')">Światło (wewn.)</button>
+    </div>
+
+    <div class="input-list">
+        <!-- Wysokość -->
+        <div class="input-row">
+            <div class="input-label">
+                <span id="lblHeight">Wysokość korpusu</span>
+                <span class="input-sublabel">W wymiarze mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepVal('inpHeight', -10)">-</button>
+                <input type="number" id="inpHeight" class="stepper-input" value="720" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepVal('inpHeight', 10)">+</button>
+            </div>
+        </div>
+
+        <!-- Płyta Korpusu -->
+        <div class="input-row">
+            <div class="input-label">
+                <span>Grubość korpusu</span>
+                <span class="input-sublabel">Standard: 18 mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepVal('inpBodyThick', -1)">-</button>
+                <input type="number" id="inpBodyThick" class="stepper-input" value="18" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepVal('inpBodyThick', 1)">+</button>
+            </div>
+        </div>
+
+        <!-- Płyta Półki -->
+        <div class="input-row">
+            <div class="input-label">
+                <span>Grubość półki</span>
+                <span class="input-sublabel">Np. 18 / 28 mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepVal('inpShelfThick', -1)">-</button>
+                <input type="number" id="inpShelfThick" class="stepper-input" value="18" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepVal('inpShelfThick', 1)">+</button>
+            </div>
+        </div>
+
+        <!-- Liczba półek -->
+        <div class="input-row">
+            <div class="input-label">
+                <span>Liczba półek</span>
+                <span class="input-sublabel">Ilość sztuk wewnątrz</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepVal('inpShelfCount', -1, 1)">-</button>
+                <input type="number" id="inpShelfCount" class="stepper-input" value="2" min="1" max="10" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepVal('inpShelfCount', 1, 1)">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KARTA WYNIKÓW -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <span class="card-title">Rozmieszczenie i trasowanie</span>
+    </div>
+
+    <div class="result-box">
+        <div class="result-value" id="resClearSpace">0 mm</div>
+        <div class="result-label">Przestrzeń między półkami</div>
+    </div>
+
+    <div class="list-table" id="measuresList"></div>
+</div>
+
+<!-- KARTA SCHEMATU -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <span class="card-title">Schemat przekroju korpusu</span>
+    </div>
+    <div class="cad-wrapper" id="cadContainer"></div>
+</div>

@@ -41,20 +41,19 @@ function calculateShelves() {
 
     if (rawHeight <= 0 || count <= 0) return;
 
-    // Światło korpusu wewnątrz
+    // Wysokość wewnętrzna (światło)
     const intHeight = shelfWidthType === 'external' ? (rawHeight - (2 * bodyThick)) : rawHeight;
 
-    // Przestrzeń czysta między półkami
+    // Dostępna przestrzeń podzielona na równe części
     const availableSpace = intHeight - (count * shelfThick);
     const gap = availableSpace / (count + 1);
 
     if (resGap) resGap.innerText = `${gap.toFixed(1)} mm`;
 
     let html = '';
-    let shelfPositions = []; // Wymiar do dołu półki mierzony od górnej powierzchni wieńca dolnego
+    let shelfPositions = []; // Wymiar od górnej powierzchni wieńca dolnego do DOŁU danej półki
 
     for (let i = 1; i <= count; i++) {
-        // Pozycja dolnej krawędzi półki od wieńca
         const posToBottom = (i * gap) + ((i - 1) * shelfThick);
         shelfPositions.push(posToBottom);
 
@@ -68,7 +67,7 @@ function calculateShelves() {
 
     if (container) container.innerHTML = html;
 
-    // Rysowanie przekroju korpusu
+    // Wywołanie funkcji rysującej na płótnie z wyliczoną skali
     drawShelvesCanvas(intHeight, shelfThick, count, gap, shelfPositions);
 }
 
@@ -80,51 +79,60 @@ function drawShelvesCanvas(intHeight, shelfThick, count, gap, shelfPositions) {
     const w = canvas.width;
     const h = canvas.height;
 
+    // Czyszczenie tła
     ctx.clearRect(0, 0, w, h);
 
-    const padX = 35;
-    const padY = 25;
-    const boxW = w - (2 * padX);
+    const padX = 55; // Większy margines z lewej na linie wymiarowe i opisy
+    const padY = 30;
+    const boxW = w - padX - 20;
     const boxH = h - (2 * padY);
 
-    // Boki korpusu (przekrój)
+    // Przekrój korpusu (zewnętrzny obrys boku)
     ctx.strokeStyle = '#4a5568';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.strokeRect(padX, padY, boxW, boxH);
 
     // Wieniec dolny i górny
     ctx.fillStyle = '#2d3748';
-    ctx.fillRect(padX, padY - 6, boxW, 6);
-    ctx.fillRect(padX, padY + boxH, boxW, 6);
+    ctx.fillRect(padX, padY - 5, boxW, 5);
+    ctx.fillRect(padX, padY + boxH, boxW, 5);
 
     const scale = boxH / intHeight;
 
-    // Rysowanie półek z zaznaczeniem wymiarowania do dołu
+    // Rysowanie półek i precyzyjnych linii wymiarowych
     shelfPositions.forEach((pos, idx) => {
         const shelfYOnCanvas = padY + boxH - (pos * scale) - (shelfThick * scale);
         const shelfHOnCanvas = Math.max(3, shelfThick * scale);
 
         // Półka
-        ctx.fillStyle = '#f59e0b';
+        ctx.fillStyle = '#3b82f6'; // Elegancki niebieski kolor akcentowy
         ctx.fillRect(padX + 2, shelfYOnCanvas, boxW - 4, shelfHOnCanvas);
 
-        // Linia wymiarowa do dołu półki
-        ctx.strokeStyle = '#a0aec0';
+        // Linia pomocnicza trasowania do DOŁU półki
+        const bottomY = padY + boxH - (pos * scale);
+
+        ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.setLineDash([2, 2]);
-        ctx.moveTo(padX - 15, padY + boxH - (pos * scale));
-        ctx.lineTo(padX + 2, padY + boxH - (pos * scale));
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(padX - 25, bottomY);
+        ctx.lineTo(padX + 2, bottomY);
         ctx.stroke();
         ctx.setLineDash([]);
+
+        // Tekst z wymiarem przy linii
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${pos.toFixed(0)}`, padX - 6, bottomY + 3);
     });
 
-    // Opis górny
+    // Nagłówek i linia światła wewnątrz
     ctx.fillStyle = '#a0aec0';
-    ctx.font = '10px sans-serif';
+    ctx.font = '11px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`Przekrój - Światło: ${intHeight.toFixed(0)} mm`, w / 2, 14);
+    ctx.fillText(`Światło: ${intHeight.toFixed(0)} mm`, padX + (boxW / 2), padY - 12);
 }
 
-// Inicjalizacja przy wczytaniu
+// Inicjalizacja przy ładowaniu
 calculateShelves();
