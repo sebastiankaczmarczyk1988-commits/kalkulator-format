@@ -1,0 +1,99 @@
+<button class="btn-back" onclick="loadModule('home')">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <span>Powrót do menu</span>
+</button>
+
+<!-- KARTA 1: PARAMETRY KORPUSU I PÓŁEK -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-icon">
+            <svg viewBox="0 0 24 24">
+                <rect x="4" y="2" width="16" height="20" rx="2"/>
+                <line x1="4" y1="8" x2="20" y2="8"/>
+                <line x1="4" y1="14" x2="20" y2="14"/>
+            </svg>
+        </div>
+        <span class="card-title">Rozstaw półek</span>
+    </div>
+
+    <div class="segmented-control">
+        <button type="button" class="active" id="btnShelfTypeExt" onclick="setShelfWidthType('external')">Wymiar zewn.</button>
+        <button type="button" id="btnShelfTypeInt" onclick="setShelfWidthType('internal')">Światło (wewn.)</button>
+    </div>
+
+    <div class="input-list">
+        <div class="input-row">
+            <div class="input-label">
+                <span id="lblShelfHeight">Wysokość zewnętrzna</span>
+                <span class="input-sublabel">Wymiar w mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfHeight', -10)">-</button>
+                <input type="number" id="inpShelfHeight" class="stepper-input" value="720" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfHeight', 10)">+</button>
+            </div>
+        </div>
+
+        <div class="input-row" id="rowShelfBodyThick">
+            <div class="input-label">
+                <span>Grubość boku (korpus)</span>
+                <span class="input-sublabel">Standard: 18 mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfBodyThick', -1)">-</button>
+                <input type="number" id="inpShelfBodyThick" class="stepper-input" value="18" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfBodyThick', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-label">
+                <span>Grubość półki</span>
+                <span class="input-sublabel">Standard: 18 mm</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfThick', -1)">-</button>
+                <input type="number" id="inpShelfThick" class="stepper-input" value="18" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfThick', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-label">
+                <span>Liczba półek</span>
+                <span class="input-sublabel">Ilość w środku</span>
+            </div>
+            <div class="stepper">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfCount', -1, 1)">-</button>
+                <input type="number" id="inpShelfCount" class="stepper-input" value="2" min="1" max="10" onfocus="this.select()" onclick="this.select()" oninput="calculateShelves()">
+                <button class="stepper-btn" onclick="stepShelfVal('inpShelfCount', 1, 1)">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KARTA 2: WYNIKI I RYSUNEK PRZEKROJU -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <span class="card-title">Wyliczenia i Przekrój</span>
+    </div>
+
+    <!-- Wynik czystej przestrzeni -->
+    <div class="result-box" style="margin-bottom: 16px;">
+        <div class="result-value" id="resShelfGap">0 mm</div>
+        <div class="result-label">Światło (przestrzeń) między półkami</div>
+    </div>
+
+    <!-- Płótno Canvas do rysowania przekroju -->
+    <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 16px;">
+        <canvas id="shelfCanvas" width="240" height="340" style="background: var(--input-bg); border: 1px solid var(--card-border); border-radius: var(--radius-sm);"></canvas>
+    </div>
+
+    <!-- Tabela wyników trasowania -->
+    <div class="list-table" id="shelfPositionsContainer">
+        <!-- Wyniki generowane przez JS -->
+    </div>
+</div>
